@@ -1,0 +1,13 @@
+resolver: clash-HEAD.yaml
+
+extra-deps:
+  - clash-shake
+  - retroclash-lib
+  - retroclash-sim
+
+  - barbies-2.0.1.0
+  - github: fumieval/barbies-th
+    commit: 040aac815b712d4cd2a9fa0990e8b0e23481a215
+
+  - github: gergoerdi/clashilator
+    commit: 87bb5c2f160fde03bb80e717ba56a9ceb4039c92
