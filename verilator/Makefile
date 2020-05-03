@@ -12,7 +12,7 @@ CPPFLAGS	= $(shell pkg-config --cflags verilator) -I$(OUT_DIR)
 CXXFLAGS	= -fPIC -O3
 VERILATOR_FLAGS	= -CFLAGS '-O3 -fPIC' -Wno-fatal --prefix VSim
 
-all: $(OUT_DIR)/libVerilatorFFI.a $(OUT_DIR)/SimMain
+all: $(OUT_DIR)/libVerilatorFFI.a
 
 clean:
 	rm -rf $(OUT_DIR)
@@ -34,9 +34,6 @@ $(OUT_DIR)/libVerilatorFFI.a: $(OUT_DIR)/VerilatorFFI.o $(VERILATOR_LIB) $(VERIL
 	rm -f $@
 	mkdir -p $(OUT_DIR)
 	ar rcsT $@ $^
-
-$(OUT_DIR)/SimMain: $(OUT_DIR)/SimMain.o $(OUT_DIR)/libVerilatorFFI.a
-	$(CXX) -o $@ $^
 
 $(OUT_DIR)/%.o : %.cpp
 	mkdir -p $(OUT_DIR)
