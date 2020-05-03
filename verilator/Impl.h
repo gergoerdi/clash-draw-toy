@@ -2,7 +2,7 @@
 
 #include "VSim.h"
 #include "verilated.h"
-#include "VerilatorAPI.h"
+#include "Interface.h"
 
 extern "C" {
     VSim* vinit();

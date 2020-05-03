@@ -2,14 +2,13 @@
 module Main where
 
 import Prelude
-import Clash.Prelude (boolToBit)
+import Clash.Prelude (boolToBit, high, low)
 
 import RetroClash.VGA
 import RetroClash.Sim.SDL
 import RetroClash.Sim.VGA
 import RetroClash.Sim.VGASDL
 
-import SimInterface
 import VerilatorFFI
 import Foreign.Storable
 import Foreign.Marshal.Alloc
@@ -47,17 +46,17 @@ main = withRunner $ \runCycle -> do
         guard $ not $ keyDown ScancodeEscape
 
         let input = INPUT
-                { reset = False
-                , btnUp = keyDown ScancodeUp
-                , btnDown = keyDown ScancodeDown
-                , btnLeft = keyDown ScancodeLeft
-                , btnRight = keyDown ScancodeRight
+                { iRESET = low
+                , iBTN_UP = boolToBit $ keyDown ScancodeUp
+                , iBTN_DOWN = boolToBit $ keyDown ScancodeDown
+                , iBTN_LEFT = boolToBit $ keyDown ScancodeLeft
+                , iBTN_RIGHT = boolToBit $ keyDown ScancodeRight
                 }
 
         whileM $ do
             vgaOut <- do
                 OUTPUT{..} <- liftIO $ runCycle input
-                return (vgaHSYNC, vgaVSYNC, (vgaRED, vgaGREEN, vgaBLUE))
+                return (oVGA_HSYNC, oVGA_VSYNC, (oVGA_RED, oVGA_GREEN, oVGA_BLUE))
             fmap not $ zoom _1 $ lift $ vgaSinkBuf vga640x480at60 buf vgaOut
 
         zoom _2 $ do
