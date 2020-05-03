@@ -3,8 +3,6 @@
 #include "VerilatorFFI.h"
 #include "VerilatorBridge.h"
 
-#include <iostream>
-
 vluint64_t main_time = 0;
 
 double sc_time_stamp ()
