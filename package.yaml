@@ -78,12 +78,12 @@ executables:
       then:
         source-dirs:
           - src
-          - verilator
+          - _build/verilator
         extra-libraries: stdc++ 
-        extra-lib-dirs: verilator
+        extra-lib-dirs: _build/verilator
         ghc-options: -O3 -fPIC -pgml g++ -optl-Wl,--allow-multiple-definition -optl-Wl,--whole-archive -optl-Wl,-Bstatic -optl-Wl,-L_build/verilator -optl-Wl,-lVerilatorFFI -optl-Wl,-Bdynamic -optl-Wl,--no-whole-archive
         
         build-tools: hsc2hs
-        include-dirs: verilator
+        include-dirs: _build/verilator
       else:
         buildable: false

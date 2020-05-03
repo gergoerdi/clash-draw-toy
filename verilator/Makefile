@@ -1,6 +1,7 @@
 OUT_ROOT	= ../_build
 
 CLASH_OUT	= $(OUT_ROOT)/clash-syn/verilog/DrawToy
+MANIFEST_SRC	= $(CLASH_OUT)/topEntity/topEntity.manifest
 VERILOG_SRCS	= $(CLASH_OUT)/topEntity/topEntity.v
 
 OUT_DIR		= $(OUT_ROOT)/verilator
@@ -8,16 +9,22 @@ VERILATOR_HDRS	= $(OUT_DIR)/VSim.h
 VERILATOR_LIB	= $(OUT_DIR)/VSim__ALL.a
 VERILATOR_OBJS  = $(OUT_DIR)/verilated.o
 
+GEN_SRCS	= $(foreach file, Impl.cpp Impl.h Interface.h, $(OUT_DIR)/$(file))
+HSC_SRCS	= $(OUT_DIR)/VerilogFFI.hsc
+
 CPPFLAGS	= $(shell pkg-config --cflags verilator) -I$(OUT_DIR)
 CXXFLAGS	= -fPIC -O3
 VERILATOR_FLAGS	= -CFLAGS '-O3 -fPIC' -Wno-fatal --prefix VSim
 
-all: $(OUT_DIR)/libVerilatorFFI.a
+all: $(HSC_SRCS) $(OUT_DIR)/libVerilatorFFI.a
 
 clean:
 	rm -rf $(OUT_DIR)
 
 .PHONY: all clean
+
+$(GEN_SRCS) $(HSC_SRCS): $(MANIFEST_SRC)
+	clashilator -i $< -o $(OUT_DIR)
 
 $(OUT_DIR)/VSim.mk: $(VERILOG_SRCS)
 	verilator $(VERILATOR_FLAGS) --cc -Mdir $(OUT_DIR) $(VERILOG_SRCS)
@@ -28,7 +35,7 @@ $(OUT_DIR)/verilated.o: $(shell pkg-config --variable=includedir verilator)/veri
 $(VERILATOR_LIB) $(VERILATOR_HDRS): $(OUT_DIR)/VSim.mk 
 	cd $(OUT_DIR) && make -f VSim.mk
 
-$(OUT_DIR)/VerilatorFFI.o: Impl.cpp Impl.h Interface.h $(VERILATOR_HDRS)
+$(OUT_DIR)/VerilatorFFI.o: $(GEN_SRCS) $(VERILATOR_HDRS)
 	$(COMPILE.cc) $(OUTPUT_OPTION) $<
 
 $(OUT_DIR)/libVerilatorFFI.a: $(OUT_DIR)/VerilatorFFI.o $(VERILATOR_LIB) $(VERILATOR_OBJS)
