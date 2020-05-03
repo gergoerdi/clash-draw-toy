@@ -28,7 +28,7 @@ $(OUT_DIR)/verilated.o: $(shell pkg-config --variable=includedir verilator)/veri
 $(VERILATOR_LIB) $(VERILATOR_HDRS): $(OUT_DIR)/VSim.mk 
 	cd $(OUT_DIR) && make -f VSim.mk
 
-$(OUT_DIR)/VerilatorFFI.o: VerilatorFFI.cpp VerilatorFFI.h VerilatorAPI.h $(VERILATOR_HDRS)
+$(OUT_DIR)/VerilatorFFI.o: VerilatorFFI.cpp VerilatorFFI.h VerilatorAPI.h VerilatorBridge.h $(VERILATOR_HDRS)
 
 $(OUT_DIR)/libVerilatorFFI.a: $(OUT_DIR)/VerilatorFFI.o $(VERILATOR_LIB) $(VERILATOR_OBJS)
 	rm -f $@

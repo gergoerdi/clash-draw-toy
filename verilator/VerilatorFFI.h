@@ -1,3 +1,5 @@
+#pragma once
+
 #include "VSim.h"
 #include "verilated.h"
 #include "VerilatorAPI.h"
