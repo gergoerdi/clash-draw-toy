@@ -76,14 +76,7 @@ executables:
     when:
     - condition: flag(verilator)
       then:
-        source-dirs:
-          - src
-          - _build/verilator/generated
-        extra-libraries: stdc++ 
-        extra-lib-dirs: _build/verilator/compiled
-        ghc-options: -O3 -fPIC -pgml g++ -optl-Wl,--allow-multiple-definition -optl-Wl,--whole-archive -optl-Wl,-Bstatic -optl-Wl,-L_build/compiled/verilator -optl-Wl,-lVerilatorFFI -optl-Wl,-Bdynamic -optl-Wl,--no-whole-archive
-        
-        build-tools: hsc2hs
-        include-dirs: _build/verilator/generated
+        dependencies:
+          - clashilator-ffi
       else:
         buildable: false
