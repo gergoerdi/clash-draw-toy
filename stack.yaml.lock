@@ -88,19 +88,19 @@ packages:
   original:
     url: https://github.com/fumieval/barbies-th/archive/040aac815b712d4cd2a9fa0990e8b0e23481a215.tar.gz
 - completed:
-    size: 6243
-    url: https://github.com/gergoerdi/clashilator/archive/87bb5c2f160fde03bb80e717ba56a9ceb4039c92.tar.gz
+    size: 8423
+    url: https://github.com/gergoerdi/clashilator/archive/16373f805ad4006f629701bdfd1c37906d0f667b.tar.gz
     cabal-file:
-      size: 1792
-      sha256: 56d3a2f70acd0090ea0f1b4f51c514022cf14bdafb9cd57acf184769839ff1f4
+      size: 1844
+      sha256: 3fd10191fb61af821e1c92bf5cee575c3a53685aa0fc9eb23aab4502be67993c
     name: clashilator
     version: 0.1.0
-    sha256: a5c2f52d8263621437402f306033f4999ab32f21b8f6c2e200cff85a0a97f93f
+    sha256: ea0367df224536930abedcf1211317335c259bb51fbf3340c211b6a4f8b8b714
     pantry-tree:
-      size: 794
-      sha256: 39b5101f34537a3b75a0d6653e6b9a04513a5bbb258199b534181f9485d80efa
+      size: 881
+      sha256: d5b66a562c40bc7c104ed0aafe6d2a48383badd830b5e49673399035ef924d1b
   original:
-    url: https://github.com/gergoerdi/clashilator/archive/87bb5c2f160fde03bb80e717ba56a9ceb4039c92.tar.gz
+    url: https://github.com/gergoerdi/clashilator/archive/16373f805ad4006f629701bdfd1c37906d0f667b.tar.gz
 snapshots:
 - completed:
     size: 492027
