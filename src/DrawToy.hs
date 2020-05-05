@@ -16,7 +16,7 @@ createDomain vSystem{vName="Dom25", vPeriod = hzToPeriod 25_175_000}
 topEntity
     :: "CLK_25MHZ" ::: Clock Dom25
     -> "RESET" ::: Reset Dom25
-    -> "BTN" ::: ("UP"     ::: Signal Dom25 (Active High)
+    -> "BTN" ::: ( "UP"    ::: Signal Dom25 (Active High)
                  , "DOWN"  ::: Signal Dom25 (Active High)
                  , "LEFT"  ::: Signal Dom25 (Active High)
                  , "RIGHT" ::: Signal Dom25 (Active High))
