@@ -9,7 +9,6 @@ custom-setup:
     - clashilator
 
     - retroclash-lib
-    - retroclash-sim
     
 dependencies:
   - base
