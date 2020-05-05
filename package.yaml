@@ -22,14 +22,12 @@ dependencies:
 
   - retroclash-lib
   - retroclash-sim
-    
-  - shake
-  - microstache
+
+  - clash-shake
   - lens
   - mtl
   - transformers
   - sdl2
-  - text
   - array
   - extra
 

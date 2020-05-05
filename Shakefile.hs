@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings, RecordWildCards #-}
-import ShakeClash
+import Clash.Shake
 
 import Development.Shake
 import Development.Shake.Command
@@ -21,10 +21,9 @@ clashProject = ClashProject
     , clashTopName = "topEntity"
     , topName = "Top"
     , clashFlags =
-        [ "-i../retroclash-lib/src"
+        [ "-iretroclash-lib/src"
         , "-Wno-partial-type-signatures"
         ]
-    , shakeDir = "../clash-shake/shake"
     , buildDir = "_build"
     , clashDir = "clash-syn"
     }
