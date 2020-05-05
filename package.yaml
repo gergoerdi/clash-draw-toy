@@ -7,9 +7,6 @@ custom-setup:
     - base
     - Cabal
     - clashilator
-
-    - retroclash-lib
-    - retroclash-sim
     
 dependencies:
   - base
@@ -22,14 +19,12 @@ dependencies:
 
   - retroclash-lib
   - retroclash-sim
-    
-  - shake
-  - microstache
+
+  - clash-shake
   - lens
   - mtl
   - transformers
   - sdl2
-  - text
   - array
   - extra
 

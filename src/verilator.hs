@@ -23,7 +23,6 @@ import Control.Lens
 import Data.Int
 import Text.Printf
 import Control.Monad.Extra
-import Data.Text
 
 {-# INLINE withRunner #-}
 withRunner :: ((INPUT -> IO OUTPUT) -> IO a) -> IO a
