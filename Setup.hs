@@ -14,8 +14,5 @@ main = defaultMainWithHooks simpleUserHooks
 
 myBuildHook :: PackageDescription -> LocalBuildInfo -> UserHooks -> BuildFlags -> IO ()
 myBuildHook pkg localInfo userHooks buildFlags = do
-    let flags = configConfigurationsFlags . configFlags $ localInfo
-        verilatorFlag = fromMaybe False $ lookupFlagAssignment (mkFlagName "verilator") flags
-
-    pkg <- if verilatorFlag then clashilate pkg localInfo buildFlags "DrawToy" else return pkg
+    pkg <- clashilate pkg localInfo buildFlags
     buildHook simpleUserHooks pkg localInfo userHooks buildFlags

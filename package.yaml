@@ -80,6 +80,7 @@ executables:
     when:
     - condition: flag(verilator)
       then:
-        buildable: true
+        verbatim:
+          x-clashilator-top: DrawToy
       else:
         buildable: false
