@@ -2,6 +2,15 @@ name: clash-draw-toy
 version: 0.1.0
 category: acme
 
+custom-setup:
+  dependencies:
+    - base
+    - Cabal
+    - clashilator
+
+    - retroclash-lib
+    - retroclash-sim
+    
 dependencies:
   - base
   - clash-prelude
@@ -13,7 +22,7 @@ dependencies:
 
   - retroclash-lib
   - retroclash-sim
-
+    
   - shake
   - microstache
   - lens
@@ -68,15 +77,11 @@ flags:
     default: False
 
 executables:
-  # draw-toy:
-  #   main: simulator.hs
-
   draw-toy-verilator:
     main: verilator.hs
     when:
     - condition: flag(verilator)
       then:
-        dependencies:
-          - clashilator-ffi
+        buildable: true
       else:
         buildable: false
