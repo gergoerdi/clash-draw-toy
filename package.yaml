@@ -7,8 +7,6 @@ custom-setup:
     - base
     - Cabal
     - clashilator
-
-    - retroclash-lib
     
 dependencies:
   - base
