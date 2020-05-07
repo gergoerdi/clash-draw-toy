@@ -41,7 +41,7 @@ main = withRunner $ \runCycle -> do
     buf <- newBufferArray
     t0 <- ticks
 
-    flip evalStateT (initSink, (1, t0)) $ withMainWindow videoParams $ \events keyDown -> do
+    flip evalStateT initSink $ withMainWindow videoParams $ \events keyDown -> do
         guard $ not $ keyDown ScancodeEscape
 
         let input = INPUT
@@ -56,17 +56,7 @@ main = withRunner $ \runCycle -> do
             vgaOut <- do
                 OUTPUT{..} <- liftIO $ runCycle input
                 return (oVGA_HSYNC, oVGA_VSYNC, (oVGA_RED, oVGA_GREEN, oVGA_BLUE))
-            fmap not $ zoom _1 $ lift $ vgaSinkBuf vga640x480at60 buf vgaOut
-
-        zoom _2 $ do
-            (i, t0) <- get
-            if i == 60 then do
-                t <- ticks
-                let dt = t - t0
-                    fps = 1000 / (fromIntegral dt / 60) :: Double
-                liftIO $ printf "60 frames in %d ms, %.1f fps\n" dt fps
-                put (1, t)
-              else put (i + 1, t0)
+            fmap not $ lift $ vgaSinkBuf vga640x480at60 buf vgaOut
 
         return $ rasterizeBuffer buf
   where
@@ -74,4 +64,5 @@ main = withRunner $ \runCycle -> do
         { windowTitle = "Drawing Toy"
         , screenScale = 2
         , screenRefreshRate = 60
+        , reportFPS = True
         }
