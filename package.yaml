@@ -78,6 +78,7 @@ executables:
     - condition: flag(verilator)
       then:
         verbatim:
-          x-clashilator-top: DrawToy
+          x-clashilator-top-is: DrawToy
+          x-clashilator-clock: CLK_25MHZ
       else:
         buildable: false

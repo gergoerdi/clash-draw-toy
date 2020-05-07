@@ -9,7 +9,7 @@ import RetroClash.Sim.SDL
 import RetroClash.Sim.VGA
 import RetroClash.Sim.VGASDL
 
-import VerilatorFFI
+import Clash.Clashilator.FFI
 import Foreign.Storable
 import Foreign.Marshal.Alloc
 
