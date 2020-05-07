@@ -56,7 +56,7 @@ main = withRunner $ \runCycle -> do
             vgaOut <- do
                 OUTPUT{..} <- liftIO $ runCycle input
                 return (oVGA_HSYNC, oVGA_VSYNC, (oVGA_RED, oVGA_GREEN, oVGA_BLUE))
-            fmap not $ lift $ vgaSinkBuf vga640x480at60 buf vgaOut
+            fmap not $ vgaSinkBuf vga640x480at60 buf vgaOut
 
         return $ rasterizeBuffer buf
   where
