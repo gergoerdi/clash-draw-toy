@@ -5,6 +5,7 @@ module DrawToy where
 import Clash.Prelude
 import Clash.Annotations.TH
 import RetroClash.Utils
+import RetroClash.Barbies
 import RetroClash.VGA
 import RetroClash.Video
 import RetroClash.Clock
@@ -23,7 +24,7 @@ topEntity
     -> "VGA" ::: VGAOut Dom25 8 8 8
 topEntity = withEnableGen board
   where
-    board btns = vgaOut vgaSync' rgb
+    board btns = delayVGA vgaSync rgb
       where
         VGADriver{..} = vgaDriver vga640x480at60
         frameEnd = isFalling False (isJust <$> vgaY)
@@ -32,7 +33,6 @@ topEntity = withEnableGen board
         y = center . scale (SNat @5) $ vgaY
         rgb = drawToy frameEnd input x y
 
-        vgaSync' = delayVGA vgaSync
         input = fromButtons <$> bundle (up', dn', lt', rt')
           where
             (up, dn, lt, rt) = btns
@@ -54,12 +54,19 @@ fromButtons (_, _, True, _) = Just MoveLeft
 fromButtons (_, _, _, True) = Just MoveRight
 fromButtons _               = Nothing
 
-delayVGA :: (HiddenClockResetEnable dom) => VGASync dom -> VGASync dom
-delayVGA VGASync{..} = VGASync
-    { vgaHSync = register undefined vgaHSync
-    , vgaVSync = register undefined vgaVSync
-    , vgaDE = register undefined vgaDE
-    }
+delayVGA
+    :: (KnownNat r, KnownNat g, KnownNat b)
+    => (HiddenClockResetEnable dom)
+    => Signals dom VGASync
+    -> Signal dom (Unsigned r, Unsigned g, Unsigned b)
+    -> VGAOut dom r g b
+delayVGA VGASync{..} rgb = vgaOut sync' rgb
+  where
+    sync' = VGASync
+        { vgaHSync = register undefined vgaHSync
+        , vgaVSync = register undefined vgaVSync
+        , vgaDE = register undefined vgaDE
+        }
 
 drawToy
     :: (HiddenClockResetEnable dom)
