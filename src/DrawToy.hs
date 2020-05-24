@@ -55,18 +55,18 @@ fromButtons (_, _, _, True) = Just MoveRight
 fromButtons _               = Nothing
 
 delayVGA
-    :: (KnownNat r, KnownNat g, KnownNat b)
-    => (HiddenClockResetEnable dom)
+    :: forall dom d r g b. (HiddenClockResetEnable dom, KnownNat d, KnownNat r, KnownNat g, KnownNat b)
     => Signals dom VGASync
-    -> Signal dom (Unsigned r, Unsigned g, Unsigned b)
+    -> DSignal dom d (Unsigned r, Unsigned g, Unsigned b)
     -> VGAOut dom r g b
-delayVGA VGASync{..} rgb = vgaOut sync' rgb
+delayVGA sync rgb = VGAOut{..}
   where
-    sync' = VGASync
-        { vgaHSync = register undefined vgaHSync
-        , vgaVSync = register undefined vgaVSync
-        , vgaDE = register undefined vgaDE
-        }
+    vgaSync = bunbundle . matchDelay rgb . bbundle $ sync
+
+    matchDelay :: (NFDataX a) => DSignal dom d any -> Signal dom a -> Signal dom a
+    matchDelay d = toSignal . (d *>) . toDelayedU
+
+    (vgaR, vgaG, vgaB) = unbundle $ toSignal rgb
 
 drawToy
     :: (HiddenClockResetEnable dom)
@@ -74,7 +74,7 @@ drawToy
     -> Signal dom (Maybe Move)
     -> Signal dom (Maybe (Index 128))
     -> Signal dom (Maybe (Index 64))
-    -> Signal dom (Unsigned 8, Unsigned 8, Unsigned 8)
+    -> DSignal dom 1 (Unsigned 8, Unsigned 8, Unsigned 8)
 drawToy frameEnd input x y = rgb
   where
     rx = fromMaybe 0 <$> x
@@ -94,15 +94,16 @@ drawToy frameEnd input x y = rgb
     frameCounter = regEn (0 :: Index 10) frameEnd $ nextIdx <$> frameCounter
     cursorState = regEn True (frameEnd .&&. frameCounter .== 0) $ not <$> cursorState
 
-    fbRead = blockRam1 ClearOnReset (SNat @(2^(6 + 7))) False fbAddr fbWrite
-    fbWrite = do
+    fbRead = delayedBlockRam1 ClearOnReset (SNat @(128 * 64)) False fbAddr fbWrite
+
+    fbWrite = fromSignal $ do
         ~(x, y) <- cursor
         pure $ Just (bitCoerce @_ @(Unsigned _) (y, x), True)
 
-    fbAddr = bitCoerce <$> bundle (ry, rx)
+    fbAddr = fromSignal $ bitCoerce <$> bundle (ry, rx)
 
-    rgb = mux (not <$> visible) (pure (0, 0, 0)) $
-          mux (cursor .==. bundle (rx, ry)) (cursorColor <$> cursorState) $
+    rgb = mux (delayedI False . fromSignal $ not <$> visible) (pure (0, 0, 0)) $
+          mux (toDelayedU $ cursor .==. bundle (rx, ry)) (toDelayedU $ cursorColor <$> cursorState) $
           pixel <$> fbRead
 
     pixel True  = (240, 200, 255)
@@ -110,5 +111,29 @@ drawToy frameEnd input x y = rgb
 
     cursorColor True  = (255, 255, 255)
     cursorColor False = (128, 128, 128)
+
+delayedU
+  :: (KnownNat d, NFDataX a, HiddenClockResetEnable dom)
+  => DSignal dom n a
+  -> DSignal dom (n + d) a
+delayedU = delayedI undefined
+
+toDelayedU
+  :: (KnownNat d, NFDataX a, HiddenClockResetEnable dom)
+  => Signal dom a
+  -> DSignal dom d a
+toDelayedU = delayedU . fromSignal
+
+
+delayedBlockRam1
+    :: (1 <= m, Enum addr, NFDataX a, HiddenClockResetEnable dom)
+    => ResetStrategy r
+    -> SNat m
+    -> a
+    -> DSignal dom d addr
+    -> DSignal dom d (Maybe (addr, a))
+    -> DSignal dom (d + 1) a
+delayedBlockRam1 resetStrat size content addr wr = unsafeFromSignal $
+    blockRam1 resetStrat size content (toSignal addr) (toSignal wr)
 
 makeTopEntity 'topEntity
