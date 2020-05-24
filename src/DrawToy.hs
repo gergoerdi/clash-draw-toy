@@ -21,7 +21,7 @@ topEntity
                  , "DOWN"  ::: Signal Dom25 (Active High)
                  , "LEFT"  ::: Signal Dom25 (Active High)
                  , "RIGHT" ::: Signal Dom25 (Active High))
-    -> "VGA" ::: VGAOut Dom25 8 8 8
+    -> "VGA" ::: VGAOut Dom25 (RGB 8 8 8)
 topEntity = withEnableGen board
   where
     board btns = delayVGA vgaSync rgb
@@ -55,18 +55,17 @@ fromButtons (_, _, _, True) = Just MoveRight
 fromButtons _               = Nothing
 
 delayVGA
-    :: forall dom d r g b. (HiddenClockResetEnable dom, KnownNat d, KnownNat r, KnownNat g, KnownNat b)
-    => Signals dom VGASync
-    -> DSignal dom d (Unsigned r, Unsigned g, Unsigned b)
-    -> VGAOut dom r g b
+    :: (HiddenClockResetEnable dom, KnownNat d)
+    => Signal dom (Pure VGASync)
+    -> DSignal dom d rgb
+    -> VGAOut dom rgb
 delayVGA sync rgb = VGAOut{..}
   where
-    vgaSync = bunbundle . matchDelay rgb . bbundle $ sync
+    vgaSync = matchDelay rgb sync
+    vgaRGB = toSignal rgb
 
-    matchDelay :: (NFDataX a) => DSignal dom d any -> Signal dom a -> Signal dom a
+    matchDelay :: (KnownNat d, NFDataX a, HiddenClockResetEnable dom) => DSignal dom d b -> Signal dom a -> Signal dom a
     matchDelay d = toSignal . (d *>) . toDelayedU
-
-    (vgaR, vgaG, vgaB) = unbundle $ toSignal rgb
 
 drawToy
     :: (HiddenClockResetEnable dom)
@@ -74,7 +73,7 @@ drawToy
     -> Signal dom (Maybe Move)
     -> Signal dom (Maybe (Index 128))
     -> Signal dom (Maybe (Index 64))
-    -> DSignal dom 1 (Unsigned 8, Unsigned 8, Unsigned 8)
+    -> DSignal dom 1 (RGB 8 8 8)
 drawToy frameEnd input x y = rgb
   where
     rx = fromMaybe 0 <$> x
@@ -102,15 +101,15 @@ drawToy frameEnd input x y = rgb
 
     fbAddr = fromSignal $ bitCoerce <$> bundle (ry, rx)
 
-    rgb = mux (delayedI False . fromSignal $ not <$> visible) (pure (0, 0, 0)) $
+    rgb = mux (delayedI False . fromSignal $ not <$> visible) (pure $ RGB 0 0 0) $
           mux (toDelayedU $ cursor .==. bundle (rx, ry)) (toDelayedU $ cursorColor <$> cursorState) $
           pixel <$> fbRead
 
-    pixel True  = (240, 200, 255)
-    pixel False = (32,  32,  32)
+    pixel True  = RGB 240 200 255
+    pixel False = RGB  32  32  32
 
-    cursorColor True  = (255, 255, 255)
-    cursorColor False = (128, 128, 128)
+    cursorColor True  = RGB 255 255 255
+    cursorColor False = RGB 128 128 128
 
 delayedU
   :: (KnownNat d, NFDataX a, HiddenClockResetEnable dom)
