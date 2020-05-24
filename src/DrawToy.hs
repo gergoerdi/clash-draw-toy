@@ -74,15 +74,18 @@ drawToy frameEnd input x y = rgb
     ry = fromMaybe 0 <$> y
     visible = isJust <$> x .&&. isJust <$> y
 
-    cursor = regEn ((0 :: Unsigned 7), (0 :: Unsigned 6)) frameEnd $ do
+    cursor = regEn ((0 :: Index 128), (0 :: Index 64)) frameEnd $ do
         ~(x, y) <- cursor
         input <- input
         pure $ case input of
-            Just MoveUp    -> (x,   y-1)
-            Just MoveDown  -> (x,   y+1)
-            Just MoveLeft  -> (x-1, y)
-            Just MoveRight -> (x+1, y)
-            Nothing        -> (x,   y)
+            Just MoveUp    -> (x,         prevIdx y)
+            Just MoveDown  -> (x,         nextIdx y)
+            Just MoveLeft  -> (prevIdx x, y)
+            Just MoveRight -> (nextIdx x, y)
+            Nothing        -> (x,         y)
+
+    frameCounter = regEn (0 :: Index 10) frameEnd $ nextIdx <$> frameCounter
+    cursorState = regEn True (frameEnd .&&. frameCounter .== 0) $ not <$> cursorState
 
     fbRead = blockRam1 ClearOnReset (SNat @(2^(6 + 7))) False fbAddr fbWrite
     fbWrite = do
@@ -90,10 +93,15 @@ drawToy frameEnd input x y = rgb
         pure $ Just (bitCoerce @_ @(Unsigned _) (y, x), True)
 
     fbAddr = bitCoerce <$> bundle (ry, rx)
+
     rgb = mux (not <$> visible) (pure (0, 0, 0)) $
+          mux (cursor .==. bundle (rx, ry)) (cursorColor <$> cursorState) $
           pixel <$> fbRead
 
-    pixel True = (240, 200, 255)
-    pixel False = (32, 32, 32)
+    pixel True  = (240, 200, 255)
+    pixel False = (32,  32,  32)
+
+    cursorColor True  = (255, 255, 255)
+    cursorColor False = (128, 128, 128)
 
 makeTopEntity 'topEntity
