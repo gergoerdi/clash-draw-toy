@@ -23,14 +23,9 @@ topEntity
     -> "VGA" ::: VGAOut Dom25 8 8 8
 topEntity = withEnableGen board
   where
-    board btns = delayVGA vgaSync rgb
+    board btns = vga
       where
-        VGADriver{..} = vgaDriver vga640x480at60
-        frameEnd = isFalling False (isJust <$> vgaY)
-
-        x = center . scale (SNat @5) $ vgaX
-        y = center . scale (SNat @5) $ vgaY
-        rgb = drawToy frameEnd input x y
+        (frameEnd, vga) = drawToy input
 
         input = fromButtons <$> bundle (up', dn', lt', rt')
           where
@@ -72,14 +67,17 @@ delayVGA VGASync{..} rgb = VGAOut{..}
     (vgaR, vgaG, vgaB) = unbundle $ toSignal rgb
 
 drawToy
-    :: (HiddenClockResetEnable dom)
-    => Signal dom Bool
-    -> Signal dom (Maybe Move)
-    -> Signal dom (Maybe (Index 128))
-    -> Signal dom (Maybe (Index 64))
-    -> DSignal dom 1 (Unsigned 8, Unsigned 8, Unsigned 8)
-drawToy frameEnd input x y = rgb
+    :: (HiddenClockResetEnable dom, DomainPeriod dom ~ HzToPeriod 25_175_000)
+    => Signal dom (Maybe Move)
+    -> (Signal dom Bool, VGAOut dom 8 8 8)
+drawToy input = (frameEnd, delayVGA vgaSync rgb)
   where
+    VGADriver{..} = vgaDriver vga640x480at60
+    frameEnd = isFalling False (isJust <$> vgaY)
+
+    x = center @128 . scale (SNat @5) $ vgaX
+    y = center @64 . scale (SNat @5) $ vgaY
+
     rx = fromMaybe 0 <$> x
     ry = fromMaybe 0 <$> y
     visible = isJust <$> x .&&. isJust <$> y
